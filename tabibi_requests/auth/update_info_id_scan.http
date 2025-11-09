@@ -1,0 +1,9 @@
+POST http://localhost:8002/api/auth/update_info
+Authorization: Bearer hex_auth_token
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="id_scan"; filename="mustermann.png"
+
+< mustermann.png
+--boundary

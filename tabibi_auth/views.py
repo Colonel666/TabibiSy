@@ -1,6 +1,7 @@
 import datetime
 import json
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import JsonResponse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
@@ -107,6 +108,11 @@ def get_current_info_view(request):
     if not user.is_authenticated:
         return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
     refresh_token = Token.objects.filter(user=user, is_refresh=True).order_by('-expires_at').first() if Token.objects.filter(user=user, is_refresh=True).exists() else None
+    id_scan_base64 = ''
+    if user.id_scan and hasattr(user.id_scan, 'read'):
+        import base64
+        id_scan_content = user.id_scan.read()
+        id_scan_base64 = base64.b64encode(id_scan_content).decode('utf-8')
     user_info = {
         'id'           : user.id,
         'email'        : user.email,
@@ -115,8 +121,10 @@ def get_current_info_view(request):
         'full_name'    : user.full_name,
         'user_type'    : user.user_type,
         'is_active'    : user.is_active,
+        'id_number'    : user.id_number,
         'refresh_token': refresh_token.token if refresh_token else None,
         'refresh_token_expires_at': refresh_token.expires_at if refresh_token else None,
+        'id_scan_base64': id_scan_base64,
     }
     return JsonResponse({'status': 'ok', 'user': user_info})
 
@@ -127,4 +135,34 @@ def logout_view(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
     user = request.user
     Token.objects.filter(user=user).delete()
+    return JsonResponse({'status': 'ok'})
+
+
+@csrf_exempt
+def update_info_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+    if request.headers.get('Content-Type', '') == 'application/json':
+        try: body = json.loads(request.body)
+        except json.JSONDecodeError: return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
+    else: body = {}
+    id_scan = request.FILES.get('id_scan')
+    id_scan_base64 = body.get('id_scan_base64', '').strip()
+    id_scan_bytes = None
+    if id_scan_base64:
+        import base64
+        id_scan_bytes = base64.b64decode(id_scan_base64)
+    id_number = body.get('id_number', '').strip()
+    first_name = body.get('first_name', '').strip()
+    last_name = body.get('last_name', '').strip()
+
+    if first_name   : user.first_name = first_name
+    if last_name    : user.last_name  = last_name
+    if id_number    : user.id_number  = id_number
+    if id_scan      : user.id_scan    = id_scan
+    if id_scan_bytes: user.id_scan = SimpleUploadedFile('id_scan.png', id_scan_bytes)
+    user.save()
     return JsonResponse({'status': 'ok'})

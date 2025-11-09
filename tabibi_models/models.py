@@ -43,6 +43,8 @@ class User(AbstractBaseUser, CommonInfo, PermissionsMixin):
     first_name     = models.CharField('firstname', max_length=150, blank=True)
     last_name      = models.CharField('lastname', max_length=150, blank=True)
     is_active      = models.BooleanField('Active', default=False)
+    id_number      = models.CharField(max_length=100, blank=True, null=True)
+    id_scan        = models.FileField(upload_to='id_scans/', blank=True, null=True)
 
     objects = TabibiUserManager()
 

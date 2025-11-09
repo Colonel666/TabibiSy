@@ -20,7 +20,7 @@ class MyUserAdmin(UserAdmin):
         ('Personal info'  , {'fields': ('first_name', 'last_name', 'email', )}),
         ('Permissions'    , {'fields': ('is_active', 'is_superuser', )}),
         ('Important dates', {'fields': ('last_login', )}),
-        ('My fields'      , {'fields': ('email_verified', 'created_at', 'updated_at', 'user_type', )}))
+        ('My fields'      , {'fields': ('email_verified', 'created_at', 'updated_at', 'user_type', 'id_scan', 'id_number',  )}))
     add_fieldsets = (
         (None             , {'fields': ('email', 'password1', 'password2'), 'classes': ('wide',)}),)
 
