@@ -134,6 +134,8 @@ def get_current_info_view(request):
 def logout_view(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    if not request.user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
     user = request.user
     Token.objects.filter(user=user).delete()
     return JsonResponse({'status': 'ok'})

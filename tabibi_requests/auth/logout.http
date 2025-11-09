@@ -1,0 +1,3 @@
+POST http://localhost:8002/api/auth/logout
+Content-Type: application/json
+Authorization: Bearer hex_auth_token
