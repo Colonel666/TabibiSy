@@ -5,7 +5,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.db import models
 from django.contrib.auth.models import PermissionsMixin
 
-from core.constants import USER_TYPE_CHOICES, Const
+from tabibi_core.constants import USER_TYPE_CHOICES, Const
 
 
 class CommonInfo(models.Model):

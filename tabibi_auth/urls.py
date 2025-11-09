@@ -1,6 +1,6 @@
 from django.urls import path
 
-from tabibi_core.views import register
+from tabibi_auth.views import register
 
 app_name = 'tabibi_core'
 

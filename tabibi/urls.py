@@ -6,7 +6,7 @@ from django.conf.urls import include
 
 urlpatterns = [
     path('admin/', admin.site.urls, name='admin'),
-    path('', include('tabibi_core.urls')),
+    path('api/auth', include('tabibi_auth.urls')),
 ]
 
 

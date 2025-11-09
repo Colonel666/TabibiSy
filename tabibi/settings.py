@@ -19,8 +19,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'tabibi_core',
     'tabibi_models',
+    'tabibi_auth',
+    'tabibi_core',
 
 ]
 
