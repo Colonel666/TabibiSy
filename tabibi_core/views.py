@@ -3,7 +3,7 @@ import datetime
 from django.http import JsonResponse
 from django.utils import timezone
 
-from core.models import User, Token
+from tabibi_models.models import User, Token
 
 
 def register(request):

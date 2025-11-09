@@ -1,6 +1,6 @@
 from django import template
 
-from core.en_ar import EN_AR
+from tabibi_core.en_ar import EN_AR
 
 register = template.Library()
 

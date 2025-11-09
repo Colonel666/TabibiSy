@@ -2,7 +2,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-AUTH_USER_MODEL = 'core.User'
+AUTH_USER_MODEL = 'tabibi_models.User'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEBUG = os.getenv('DEBUG', 'True') in ['True', 'true']
 
@@ -19,7 +19,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'core',
+    'tabibi_core',
+    'tabibi_models',
 
 ]
 

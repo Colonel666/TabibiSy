@@ -1,8 +1,8 @@
 from django.urls import path
 
-from core.views import register
+from tabibi_core.views import register
 
-app_name = 'core'
+app_name = 'tabibi_core'
 
 urlpatterns = [
     # path('', index, name='index'),

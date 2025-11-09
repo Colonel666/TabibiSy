@@ -2,7 +2,7 @@ from core.constants import Const
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from core.models import User
+from tabibi_models.models import User
 
 
 @admin.register(User)
