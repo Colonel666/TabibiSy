@@ -1,17 +1,30 @@
 import datetime
+import json
 
 from django.http import JsonResponse
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
 from tabibi_models.models import User, Token
 
 
-def register(request):
+def _create_auth_and_refresh_tokens(user):
+    Token.objects.filter(user=user).delete()
+    auth_token    = Token.objects.create(user=user, is_refresh=False, expires_at=timezone.now() + datetime.timedelta(days=1))
+    refresh_token = Token.objects.create(user=user, is_refresh=True , expires_at=timezone.now() + datetime.timedelta(days=7))
+    auth_token.refresh_from_db()
+    refresh_token.refresh_from_db()
+    return auth_token, refresh_token
+
+
+@csrf_exempt
+def register_view(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-    email = request.POST.get('email', '').lower()
-    password1 = request.POST.get('password1', '')
-    password2 = request.POST.get('password2', '')
+    body = json.loads(request.body)
+    email = body.get('email', '').lower()
+    password1 = body.get('password1', '')
+    password2 = body.get('password2', '')
     if not email:
         return JsonResponse({'status': 'error', 'message': 'Email is required'}, status=400)
     if not password1 or not password2:
@@ -26,7 +39,9 @@ def register(request):
         if existing_user.is_active or existing_user.email_verified:
             return JsonResponse({'status': 'error', 'message': 'Email already registered'}, status=400)
         now = timezone.now()
-        if abs(existing_user.created_at - now).hours > 24:
+
+        print(222, (now - existing_user.created_at).total_seconds())
+        if abs(now - existing_user.created_at).total_seconds() > (24*60*60):
             existing_user.delete()
             existing_user = None
     if existing_user:
@@ -37,11 +52,13 @@ def register(request):
     return JsonResponse({'status': 'ok'})
 
 
-def get_token(request):
+@csrf_exempt
+def get_token_view(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-    email = request.POST.get('email', '').lower()
-    password = request.POST.get('password', '')
+    body = json.loads(request.body)
+    email = body.get('email', '').lower()
+    password = body.get('password', '')
     if not email or not password:
         return JsonResponse({'status': 'error', 'message': 'Email and password are required'}, status=400)
 
@@ -57,19 +74,17 @@ def get_token(request):
     #     return JsonResponse({'status': 'error', 'message': 'Account is not active or email not verified'}, status=400)
 
     if not user.is_active: user.is_active = True; user.save()
-    auth_token = Token.objects.create(user=user, expires_at=timezone.now() + datetime.timedelta(days=1))
-    refresh_token = Token.objects.create(user=user, is_refresh_token=True, expires_at=timezone.now() + datetime.timedelta(days=7))
-    auth_token.refresh_from_db()
-    refresh_token.refresh_from_db()
-
+    auth_token, refresh_token = _create_auth_and_refresh_tokens(user)
     return JsonResponse({'status': 'ok', 'auth_token': auth_token.token, 'refresh_token': refresh_token.token,
                          'auth_token_expires_at': auth_token.expires_at, 'refresh_token_expires_at': refresh_token.expires_at})
 
 
-def refresh_token(request):
+@csrf_exempt
+def refresh_token_view(request):
     if request.method != 'POST':
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-    refresh_token_value = request.POST.get('refresh_token', '')
+    body = json.loads(request.body)
+    refresh_token_value = body.get('refresh_token', '')
     if not refresh_token_value:
         return JsonResponse({'status': 'error', 'message': 'Refresh token is required'}, status=400)
 
@@ -82,10 +97,15 @@ def refresh_token(request):
         return JsonResponse({'status': 'error', 'message': 'Refresh token has expired'}, status=400)
 
     user = refresh_token.user
-    new_auth_token = Token.objects.create(user=user, expires_at=timezone.now() + datetime.timedelta(days=1))
-    new_refresh_token = Token.objects.create(user=user, is_refresh_token=False, expires_at=timezone.now() + datetime.timedelta(days=7))
-    new_auth_token.refresh_from_db()
-    new_refresh_token.refresh_from_db()
-
+    new_auth_token, new_refresh_token = _create_auth_and_refresh_tokens(user)
     return JsonResponse({'status': 'ok', 'auth_token': new_auth_token.token, 'refresh_token': new_refresh_token.token,
                          'auth_token_expires_at': new_auth_token.expires_at, 'refresh_token_expires_at': new_refresh_token.expires_at})
+
+
+@csrf_exempt
+def logout_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+    user = request.user
+    Token.objects.filter(user=user).delete()
+    return JsonResponse({'status': 'ok'})

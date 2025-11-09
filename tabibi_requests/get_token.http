@@ -1,0 +1,7 @@
+POST http://localhost:8002/api/auth/get_token
+Content-Type: application/json
+
+{
+    "email": "example@example.com",
+    "password": "123"
+}

@@ -1,11 +1,19 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from tabibi_models.models import User
+from tabibi_models.models import User, Token
 
+
+class TokenInline(admin.StackedInline):
+    model = Token
+
+    def has_add_permission   (self, request, obj     ): return False
+    # def has_delete_permission(self, request, obj=None): return False
+    def has_change_permission(self, request, obj=None): return False
 
 @admin.register(User)
 class MyUserAdmin(UserAdmin):
+    inlines = [TokenInline, ]
     list_display = ['email', 'id', 'user_type', 'first_name', 'last_name']
     fieldsets = (
         (None             , {'fields': ('password', )}),
