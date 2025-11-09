@@ -102,6 +102,25 @@ def refresh_token_view(request):
                          'auth_token_expires_at': new_auth_token.expires_at, 'refresh_token_expires_at': new_refresh_token.expires_at})
 
 
+def get_current_info_view(request):
+    user = request.user
+    if not user.is_authenticated:
+        return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+    refresh_token = Token.objects.filter(user=user, is_refresh=True).order_by('-expires_at').first() if Token.objects.filter(user=user, is_refresh=True).exists() else None
+    user_info = {
+        'id'           : user.id,
+        'email'        : user.email,
+        'first_name'   : user.first_name,
+        'last_name'    : user.last_name,
+        'full_name'    : user.full_name,
+        'user_type'    : user.user_type,
+        'is_active'    : user.is_active,
+        'refresh_token': refresh_token.token if refresh_token else None,
+        'refresh_token_expires_at': refresh_token.expires_at if refresh_token else None,
+    }
+    return JsonResponse({'status': 'ok', 'user': user_info})
+
+
 @csrf_exempt
 def logout_view(request):
     if request.method != 'POST':

@@ -2,5 +2,5 @@ POST http://localhost:8002/api/auth/refresh_token
 Content-Type: application/json
 
 {
-    "refresh_token": "hex_token"
+    "refresh_token": "hex_refresh_token"
 }
