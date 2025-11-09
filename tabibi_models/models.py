@@ -36,15 +36,16 @@ class TabibiUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, CommonInfo, PermissionsMixin):
-    USERNAME_FIELD = 'email'
-    user_type      = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default=Const.USER_TYPE_PATIENT)
-    email          = models.EmailField(unique=True)
-    email_verified = models.BooleanField(default=False)
-    first_name     = models.CharField('firstname', max_length=150, blank=True)
-    last_name      = models.CharField('lastname', max_length=150, blank=True)
-    is_active      = models.BooleanField('Active', default=False)
-    id_number      = models.CharField(max_length=100, blank=True, null=True)
-    id_scan        = models.FileField(upload_to='id_scans/', blank=True, null=True)
+    USERNAME_FIELD   = 'email'
+    user_type        = models.CharField(max_length=20, choices=USER_TYPE_CHOICES, default=Const.USER_TYPE_PATIENT)
+    email            = models.EmailField(unique=True)
+    email_verified   = models.BooleanField(default=False)
+    first_name       = models.CharField('firstname', max_length=150, blank=True)
+    last_name        = models.CharField('lastname', max_length=150, blank=True)
+    is_active        = models.BooleanField('Active', default=False)
+    id_number        = models.CharField(max_length=100, blank=True, null=True)
+    id_scan          = models.FileField(upload_to='id_scans/', blank=True, null=True)
+    user_approved    = models.BooleanField(default=False)
 
     objects = TabibiUserManager()
 

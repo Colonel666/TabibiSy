@@ -122,6 +122,7 @@ def get_current_info_view(request):
         'user_type'    : user.user_type,
         'is_active'    : user.is_active,
         'id_number'    : user.id_number,
+        'user_approved': user.user_approved,
         'refresh_token': refresh_token.token if refresh_token else None,
         'refresh_token_expires_at': refresh_token.expires_at if refresh_token else None,
         'id_scan_base64': id_scan_base64,
@@ -145,6 +146,8 @@ def update_info_view(request):
     user = request.user
     if not user.is_authenticated:
         return JsonResponse({'status': 'error', 'message': 'User not authenticated'}, status=401)
+    if user.user_approved:
+        return JsonResponse({'status': 'error', 'message': 'Approved users cannot update their information'}, status=400)
     if request.headers.get('Content-Type', '') == 'application/json':
         try: body = json.loads(request.body)
         except json.JSONDecodeError: return JsonResponse({'status': 'error', 'message': 'Invalid JSON'}, status=400)
